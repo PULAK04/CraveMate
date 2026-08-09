@@ -2,7 +2,7 @@
 
 **CraveMate** is a full-stack food delivery marketplace with separate customer, restaurant, delivery-partner, admin, realtime, and payment workflows.
 
-> Upgraded from the original project with a complete CraveMate rebrand, a modern responsive UI, payment/cart reliability fixes, stronger authorization, safer service-to-service communication, and more defensive validation.
+
 
 ## Main features
 
