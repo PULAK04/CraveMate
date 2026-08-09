@@ -182,16 +182,23 @@ export const fetchOrderForPayment = TryCatch(async (req, res) => {
     return res.status(403).json({ message: "Forbidden" });
   }
 
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+  const rawId = req.params.id;
+  const orderId = Array.isArray(rawId) ? rawId[0] : rawId;
+
+  if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
     return res.status(400).json({ message: "Invalid order id" });
   }
-  const order = await Order.findById(req.params.id);
+
+  const order = await Order.findById(orderId);
+
   if (!order) {
     return res.status(404).json({ message: "Order not found" });
   }
 
   if (order.paymentStatus !== "pending") {
-    return res.status(400).json({ message: "Order is no longer awaiting payment" });
+    return res.status(400).json({
+      message: "Order is no longer awaiting payment",
+    });
   }
 
   res.json({
@@ -200,6 +207,8 @@ export const fetchOrderForPayment = TryCatch(async (req, res) => {
     currency: "INR",
   });
 });
+
+
 
 export const fetchRestaurantOrders = TryCatch(
   async (req: AuthenticatedRequest, res) => {
@@ -324,16 +333,23 @@ export const fetchSingleOrder = TryCatch(
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    const rawId = req.params.id;
+    const orderId = Array.isArray(rawId) ? rawId[0] : rawId;
+
+    if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
       return res.status(400).json({ message: "Invalid order id" });
     }
-    const order = await Order.findById(req.params.id);
+
+    const order = await Order.findById(orderId);
+
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
     if (order.userId !== req.user._id.toString()) {
-      return res.status(403).json({ message: "You cannot view this order" });
+      return res.status(403).json({
+        message: "You cannot view this order",
+      });
     }
 
     res.json(order);
@@ -413,19 +429,31 @@ export const getCurrentOrderForRider = TryCatch(async (req, res) => {
     return res.status(403).json({ message: "Forbidden" });
   }
 
-  const { riderId } = req.query;
+  const rawRiderId = req.query.riderId;
+
+  const riderId =
+    typeof rawRiderId === "string"
+      ? rawRiderId
+      : undefined;
+
   if (!riderId) {
-    return res.status(400).json({ message: "Rider id is required" });
+    return res.status(400).json({
+      message: "Rider id is required",
+    });
   }
 
   const order = await Order.findOne({
-    riderId,
-    status: { $in: ["rider_assigned", "picked_up"] },
+    riderId: riderId,
+    status: {
+      $in: ["rider_assigned", "picked_up"],
+    },
     paymentStatus: "paid",
   }).populate("restaurantId");
 
   if (!order) {
-    return res.status(404).json({ message: "No active order found" });
+    return res.status(404).json({
+      message: "No active order found",
+    });
   }
 
   res.json(order);
