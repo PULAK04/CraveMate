@@ -7,23 +7,56 @@ import paymentRoutes from "./routes/payment.js";
 import { connectRabbitMQ } from "./config/rabbitmq.js";
 
 dotenv.config();
+
 const app = express();
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-app.use(cors({ origin: frontendUrl }));
+
+const frontendUrl =
+  process.env.FRONTEND_URL || "http://localhost:5173";
+
+app.use(
+  cors({
+    origin: frontendUrl,
+  })
+);
+
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-const { CLOUD_NAME, CLOUD_API_KEY, CLOUD_SECRET_KEY } = process.env;
-if (!CLOUD_NAME || !CLOUD_API_KEY || !CLOUD_SECRET_KEY) throw new Error("Missing Cloudinary environment variables");
-cloudinary.v2.config({ cloud_name: CLOUD_NAME, api_key: CLOUD_API_KEY, api_secret: CLOUD_SECRET_KEY });
+// Render health check
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    service: "CraveMate Utils Service",
+  });
+});
+
+const {
+  CLOUD_NAME,
+  CLOUD_API_KEY,
+  CLOUD_SECRET_KEY,
+} = process.env;
+
+if (!CLOUD_NAME || !CLOUD_API_KEY || !CLOUD_SECRET_KEY) {
+  throw new Error("Missing Cloudinary environment variables");
+}
+
+cloudinary.v2.config({
+  cloud_name: CLOUD_NAME,
+  api_key: CLOUD_API_KEY,
+  api_secret: CLOUD_SECRET_KEY,
+});
 
 app.use("/api", uploadRoutes);
 app.use("/api/payment", paymentRoutes);
 
 const start = async () => {
   await connectRabbitMQ();
+
   const port = process.env.PORT || 5002;
-  app.listen(port, () => console.log(`Utils service is running on port ${port}`));
+
+  app.listen(port, () => {
+    console.log(`Utils service is running on port ${port}`);
+  });
 };
 
 start().catch((error) => {
