@@ -6,13 +6,36 @@ import { initSocket } from "./socket.js";
 import internalRoute from "./routes/internal.js";
 
 dotenv.config();
+
 const app = express();
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-app.use(cors({ origin: frontendUrl }));
+
+const frontendUrl =
+  process.env.FRONTEND_URL || "http://localhost:5173";
+
+app.use(
+  cors({
+    origin: frontendUrl,
+  })
+);
+
 app.use(express.json());
+
+// Render health check
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    service: "CraveMate Realtime Service",
+  });
+});
+
 app.use("/api/v1/internal", internalRoute);
 
 const server = http.createServer(app);
+
 initSocket(server);
+
 const port = process.env.PORT || 5004;
-server.listen(port, () => console.log(`Realtime service is running on port ${port}`));
+
+server.listen(port, () => {
+  console.log(`Realtime service is running on port ${port}`);
+});
