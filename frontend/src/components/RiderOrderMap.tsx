@@ -14,27 +14,49 @@ interface Props {
   order: IOrder;
 }
 
-const Routing = ({ from, to }: { from: [number, number]; to: [number, number] }) => {
+const Routing = ({
+  from,
+  to,
+}: {
+  from: [number, number];
+  to: [number, number];
+}) => {
   const map = useMap();
 
   useEffect(() => {
-    const routing = (L as typeof L & { Routing?: { control: (options: unknown) => L.Control; osrmv1: (options: unknown) => unknown } }).Routing;
+    const routing = (
+      L as typeof L & {
+        Routing?: {
+          control: (options: unknown) => L.Control;
+          osrmv1: (options: unknown) => unknown;
+        };
+      }
+    ).Routing;
+
     if (!routing) return;
 
     const control = routing.control({
       waypoints: [L.latLng(from), L.latLng(to)],
-      lineOptions: { styles: [{ color: "#f97316", weight: 5 }] },
+
+      lineOptions: {
+        styles: [{ color: "#f97316", weight: 5 }],
+      },
+
       addWaypoints: false,
       draggableWaypoints: false,
       show: false,
       createMarker: () => null,
+
       router: routing.osrmv1({
         serviceUrl: "https://router.project-osrm.org/route/v1",
       }),
     });
 
     control.addTo(map);
-    return () => map.removeControl(control);
+
+    return () => {
+      map.removeControl(control);
+    };
   }, [from, to, map]);
 
   return null;

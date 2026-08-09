@@ -3,7 +3,7 @@ import { useAppData } from "../context/AppContext";
 import { useEffect, useState } from "react";
 import { CgShoppingCart } from "react-icons/cg";
 import { BiMapPin, BiSearch } from "react-icons/bi";
-import { HiOutlineReceiptLong } from "react-icons/hi2";
+import { HiOutlineReceiptRefund } from "react-icons/hi2";
 import BrandLogo from "./BrandLogo";
 
 const Navbar = () => {
@@ -31,15 +31,16 @@ const Navbar = () => {
         <BrandLogo />
 
         <nav className="flex items-center gap-1.5 sm:gap-2">
-          {isAuth && (
-            <Link
-              to="/orders"
-              className="hidden items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-orange-50 hover:text-orange-600 sm:flex"
-            >
-              <HiOutlineReceiptLong className="h-5 w-5" />
-              Orders
-            </Link>
-          )}
+         {isAuth && (
+  <Link
+    to="/orders"
+    className="hidden items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-orange-50 hover:text-orange-600 sm:flex"
+  >
+    <HiOutlineReceiptRefund className="h-5 w-5" />
+
+    Orders
+  </Link>
+)}
 
           <Link
             to="/cart"
