@@ -11,12 +11,23 @@ import { connectRabbitMQ } from "./config/rabbitmq.js";
 import { startPaymentConsumer } from "./config/payment.consumer.js";
 
 dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 5001;
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+const frontendUrl =
+  process.env.FRONTEND_URL || "http://localhost:5173";
 
 app.use(cors({ origin: frontendUrl }));
 app.use(express.json());
+
+// Render health check
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    service: "CraveMate Restaurant Service",
+  });
+});
+
 app.use("/api/restaurant", restaurantRoutes);
 app.use("/api/item", itemRoutes);
 app.use("/api/cart", cartRoutes);
@@ -26,8 +37,12 @@ app.use("/api/order", orderRoutes);
 const start = async () => {
   await connectDB();
   await connectRabbitMQ();
+
   startPaymentConsumer();
-  app.listen(PORT, () => console.log(`Restaurant service is running on port ${PORT}`));
+
+  app.listen(PORT, () =>
+    console.log(`Restaurant service is running on port ${PORT}`)
+  );
 };
 
 start().catch((error) => {

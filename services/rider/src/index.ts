@@ -7,18 +7,36 @@ import { connectRabbitMQ } from "./config/rabbitmq.js";
 import { startOrderReadyConsumer } from "./config/orderReady.consumer.js";
 
 dotenv.config();
+
 const app = express();
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+const frontendUrl =
+  process.env.FRONTEND_URL || "http://localhost:5173";
+
 app.use(express.json());
 app.use(cors({ origin: frontendUrl }));
+
+// Render health check
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    service: "CraveMate Rider Service",
+  });
+});
+
 app.use("/api/rider", riderRoutes);
 
 const start = async () => {
   await connectDB();
   await connectRabbitMQ();
+
   startOrderReadyConsumer();
+
   const port = process.env.PORT || 5005;
-  app.listen(port, () => console.log(`Rider service is running on port ${port}`));
+
+  app.listen(port, () =>
+    console.log(`Rider service is running on port ${port}`)
+  );
 };
 
 start().catch((error) => {
