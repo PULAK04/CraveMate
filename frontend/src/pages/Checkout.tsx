@@ -6,8 +6,7 @@ import { useNavigate } from "react-router-dom";
 import type { ICart, IMenuItem, IRestaurant } from "../types";
 import toast from "react-hot-toast";
 import { BiCreditCard, BiLoader, BiMapPin, BiPlus } from "react-icons/bi";
-import { BsShieldCheck } from "react-icons/bs";
-import { loadStripe } from "@stripe/stripe-js";
+
 
 interface Address {
   _id: string;
@@ -38,7 +37,7 @@ declare global {
   }
 }
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
+
 
 const Checkout = () => {
   const { cart, subTotal, quauntity, fetchCart } = useAppData();
@@ -47,7 +46,7 @@ const Checkout = () => {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [loadingAddress, setLoadingAddress] = useState(true);
   const [loadingRazorpay, setLoadingRazorpay] = useState(false);
-  const [loadingStripe, setLoadingStripe] = useState(false);
+ 
   const [creatingOrder, setCreatingOrder] = useState(false);
 
   useEffect(() => {
@@ -98,7 +97,7 @@ const Checkout = () => {
   const platformFee = 7;
   const grandTotal = subTotal + deliveryFee + platformFee;
 
-  const createOrder = async (paymentMethod: "razorpay" | "stripe") => {
+  const createOrder = async (paymentMethod: "razorpay") => {
     if (!selectedAddressId) {
       toast.error("Select a delivery address first");
       return null;
@@ -191,36 +190,7 @@ const Checkout = () => {
     }
   };
 
-  const payWithStripe = async () => {
-    if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
-      toast.error("Add VITE_STRIPE_PUBLISHABLE_KEY to frontend/.env first.");
-      return;
-    }
-
-    try {
-      setLoadingStripe(true);
-      const order = await createOrder("stripe");
-      if (!order) return;
-
-      const stripe = await stripePromise;
-      if (!stripe) {
-        toast.error("Stripe could not be initialized");
-        return;
-      }
-
-      const { data } = await axios.post(`${utilsService}/api/payment/stripe/create`, {
-        orderId: order.orderId,
-      });
-
-      if (data.url) window.location.assign(data.url);
-      else toast.error("Stripe checkout session could not be created");
-    } catch (error) {
-      console.error(error);
-      toast.error("Stripe checkout could not start");
-    } finally {
-      setLoadingStripe(false);
-    }
-  };
+ 
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-7 sm:px-6 sm:py-10">
@@ -291,7 +261,7 @@ const Checkout = () => {
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <button
-                disabled={!selectedAddressId || loadingRazorpay || loadingStripe || creatingOrder}
+                disabled={!selectedAddressId || loadingRazorpay || creatingOrder}
                 onClick={payWithRazorpay}
                 className="flex items-center justify-between rounded-2xl border border-blue-100 bg-blue-50 p-4 text-left transition hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -299,17 +269,9 @@ const Checkout = () => {
                 {loadingRazorpay ? <BiLoader className="animate-spin text-blue-600" /> : <BiCreditCard className="h-6 w-6 text-blue-600" />}
               </button>
 
-              <button
-                disabled={!selectedAddressId || loadingStripe || loadingRazorpay || creatingOrder}
-                onClick={payWithStripe}
-                className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-950 p-4 text-left text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <span><span className="block text-sm font-extrabold">Stripe</span><span className="mt-1 block text-xs text-slate-400">Secure card checkout</span></span>
-                {loadingStripe ? <BiLoader className="animate-spin" /> : <BiCreditCard className="h-6 w-6" />}
-              </button>
             </div>
 
-            <p className="mt-4 flex items-center gap-2 text-xs font-medium text-slate-400"><BsShieldCheck className="text-emerald-500" /> Payment is verified server-side before your order is confirmed.</p>
+            
           </div>
         </section>
 
