@@ -3,6 +3,7 @@
 **/dist/
 **/.vite/
 **/*.tsbuildinfo
+README.md
 
 # Environment secrets
 **/.env
