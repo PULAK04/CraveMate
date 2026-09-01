@@ -36,11 +36,36 @@ export const addRiderProfile = TryCatch(
       });
     }
 
-    const { data: uploadResult } = await axios.post(
-      `${process.env.UTILS_SERVICE}/api/upload`,
-      { buffer: fileBuffer.content },
-      { headers: { "x-internal-key": process.env.INTERNAL_SERVICE_KEY } }
-    );
+    let uploadResult;
+
+try {
+  const response = await axios.post(
+    `${process.env.UTILS_SERVICE}/api/upload`,
+    { buffer: fileBuffer.content },
+    {
+      headers: {
+        "x-internal-key": process.env.INTERNAL_SERVICE_KEY,
+      },
+      timeout: 30000,
+    }
+  );
+
+  uploadResult = response.data;
+} catch (error) {
+  if (axios.isAxiosError(error)) {
+    console.error("Rider -> Utils upload failed:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      url: `${process.env.UTILS_SERVICE}/api/upload`,
+    });
+  } else {
+    console.error("Rider -> Utils upload failed:", error);
+  }
+
+  return res.status(500).json({
+    message: "Could not upload rider image",
+  });
+}
 
     const {
       phoneNumber,
