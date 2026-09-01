@@ -191,7 +191,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
         <div className="relative z-10 flex h-full flex-col justify-between">
 
-          <BrandLogo link={false} />
+          
 
           <div>
             <span className="inline-flex rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-orange-100">
